@@ -6,6 +6,7 @@ hbfl.sketch
 public/stylesheet.css
 requirements.txt
 .DS_Store
+.idea
 **/*.psd
 public/images/*-original.jpg
 public/images/*-original.png
