@@ -35,8 +35,8 @@ function terminateInstance (instanceId) {
 listInstances()
 .then(data => {
   console.log(data);
-  const hamsterInstance = data.find(e => {
-    return e.KeyName === 'hamster_key';
+  const hamsterInstance = data.find(inst => {
+    return (inst.KeyName.includes('hamster') && inst.State.Name === 'running');
   });
 
   if (hamsterInstance) {
