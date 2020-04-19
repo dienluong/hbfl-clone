@@ -112,6 +112,7 @@ function createKeyPair (keyName) {
 
 function createInstance (sgName, keyName) {
   const params = {
+    // AMI: Node.JS certified Bitnami
     ImageId: 'ami-003bca6d67e11b3c7',
     InstanceType: 't2.micro',
     KeyName: keyName,

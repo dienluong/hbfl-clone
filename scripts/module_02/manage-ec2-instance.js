@@ -35,13 +35,15 @@ function terminateInstance (instanceId) {
 listInstances()
 .then(data => {
   console.log(data);
-  const hamsterInstance = data.find(inst => {
+  const hamsterInstances = data.filter(inst => {
     return (inst.KeyName.includes('hamster') && inst.State.Name === 'running');
   });
 
-  if (hamsterInstance) {
-    terminateInstance(hamsterInstance.InstanceId)
-    .then(data => console.log(data))
-    .catch(err => console.log(err));
+  if (hamsterInstances.length) {
+    hamsterInstances.forEach(instance => {
+      terminateInstance(instance.InstanceId)
+      .then(data => console.log(data))
+      .catch(err => console.log(err));
+    });
   }
 });

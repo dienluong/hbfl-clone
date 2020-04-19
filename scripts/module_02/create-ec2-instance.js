@@ -94,6 +94,7 @@ function createKeyPair (keyName) {
 
 function createInstance (sgName, keyName) {
   const params = {
+    // AMI: Amazon Linux 2 AMI (HVM), SSD Volume Type
     ImageId: 'ami-0323c3dd2da7fb37d',
     InstanceType: 't2.micro',
     KeyName: keyName,
