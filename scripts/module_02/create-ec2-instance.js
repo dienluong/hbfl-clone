@@ -28,36 +28,45 @@ createSecurityGroup(sgName)
 });
 
 // Create functions
-
 function createSecurityGroup (sgName) {
-  const params = {
-    Description: sgName,
-    GroupName: sgName,
-  };
-
   return new Promise((resolve, reject) => {
-    ec2.createSecurityGroup(params, (err, sg) => {
-      if (err) {
-        reject(err);
-      }
+    ec2.describeSecurityGroups({ GroupNames: [sgName] }, (err, data) => {
+      if (err) { reject(err); return; }
       else {
-        // add rules to security group for SSH and app
-        const params = {
-          GroupId: sg.GroupId,
-          IpPermissions: [
-            { IpProtocol: 'tcp', FromPort: '22', ToPort: '22', IpRanges: [{ CidrIp: '0.0.0.0/0' }] },
-            { IpProtocol: 'tcp', FromPort: '3000', ToPort: '3000', IpRanges: [{ CidrIp: '0.0.0.0/0' }] }
-          ],
-        };
+        console.log('---> ', data);
+        // return if sg already exists
+        if (data.SecurityGroups.length) {
+          resolve();
+          return;
+        }
+        else {
+          const sgParams = {
+            Description: sgName,
+            GroupName: sgName,
+          };
 
-        ec2.authorizeSecurityGroupIngress(params, err => {
-          if (err) { reject(err); }
-          else { resolve(); }
-        });
+          ec2.createSecurityGroup(sgParams, (err, sg) => {
+            if (err) { reject(err); return; }
+            else {
+              // add rules to security group for SSH and app
+              const ruleParams = {
+                GroupId: sg.GroupId,
+                IpPermissions: [
+                  { IpProtocol: 'tcp', FromPort: '22', ToPort: '22', IpRanges: [{ CidrIp: '0.0.0.0/0' }] },
+                  { IpProtocol: 'tcp', FromPort: '3000', ToPort: '3000', IpRanges: [{ CidrIp: '0.0.0.0/0' }] }
+                ],
+              };
+
+              ec2.authorizeSecurityGroupIngress(ruleParams, err => {
+                if (err) { reject(err); return; }
+                else { resolve(); return; }
+              });
+            }
+          });
+        }
       }
-    })
+    });
   })
-
 }
 
 function createKeyPair (keyName) {
@@ -66,10 +75,20 @@ function createKeyPair (keyName) {
   };
 
   return new Promise((resolve, reject) => {
-    ec2.createKeyPair(params, (err, data) => {
+    ec2.describeKeyPairs({ KeyNames: [keyName] }, (err, data) => {
       if (err) { reject(err) }
-      else { resolve(data) }
-    })
+      else {
+        if (data.KeyPairs.length) {
+          resolve(data.KeyPairs[0]);
+        }
+        else {
+          ec2.createKeyPair(params, (err, data) => {
+            if (err) { reject(err) }
+            else { resolve(data) }
+          });
+        }
+      }
+    });
   });
 }
 
