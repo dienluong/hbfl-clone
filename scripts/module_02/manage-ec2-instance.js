@@ -36,14 +36,19 @@ listInstances()
 .then(data => {
   console.log(data);
   const hamsterInstances = data.filter(inst => {
-    return (inst.KeyName.includes('hamster') && inst.State.Name === 'running');
+    return (inst.KeyName.includes('hamster'));
   });
 
   if (hamsterInstances.length) {
     hamsterInstances.forEach(instance => {
-      terminateInstance(instance.InstanceId)
-      .then(data => console.log(data))
-      .catch(err => console.log(err));
+      if (instance.State.Name === 'running') {
+        terminateInstance(instance.InstanceId)
+        .then(data => console.log(data))
+        .catch(err => console.log(err));
+      }
+      else {
+        console.log('Skipping not running:', instance.InstanceId);
+      }
     });
   }
 });
