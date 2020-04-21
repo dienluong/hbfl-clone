@@ -1,10 +1,10 @@
 // Imports
 const AWS = require('aws-sdk')
 
-AWS.config.update({ region: '/* TODO: Add your region */' })
+AWS.config.update({ region: 'us-east-1' });
 
 // Declare local variables
-// TODO: Create api gateway object
+const apiG = new AWS.APIGateway();
 const apiName = 'hamster-api'
 
 let apiData
@@ -23,41 +23,56 @@ createRestApi(apiName)
 .then(data => console.log(data))
 
 function createRestApi (apiName) {
-  // TODO: Create params const
+  const params = {
+    name: apiName,
+  };
 
-  return new Promise((resolve, reject) => {
-    // TODO: Create a new rest API
-  })
+  return apiG.createRestApi(params).promise();
 }
 
-function getRootResource (api) {
-  // TODO: Create params const
+async function getRootResource (api) {
+  const params = {
+    restApiId: api.id,
+  };
 
-  return new Promise((resolve, reject) => {
-    // TODO: Get the resources and find the resource with path '/'
-  })
+  const resources = await apiG.getResources(params).promise();
+  const root = resources.items.find(r => r.path === '/');
+  return root.id;
 }
 
-function createResource (parentResourceId, resourcePath, api) {
-  // TODO: Create params const
+async function createResource (parentResourceId, resourcePath, api) {
+  const params = {
+    parentId: parentResourceId,
+    pathPart: resourcePath,
+    restApiId: api.id,
+  };
 
-  return new Promise((resolve, reject) => {
-    // TODO: Create the resource and return the resource id
-  })
+  const resource = await apiG.createResource(params).promise();
+  return resource.id;
 }
 
-function createResourceMethod (resourceId, method, api, path) {
-  // TODO: Create params const
+async function createResourceMethod (resourceId, method, api, path) {
+  const params = {
+    authorizationType: 'NONE',
+    httpMethod: method,
+    resourceId,
+    restApiId: api.id,
+  };
 
-  return new Promise((resolve, reject) => {
-    // TODO: Put the method and return the resourceId argument
-  })
+  await apiG.putMethod(params).promise();
+  return resourceId;
 }
 
-function createMethodIntegration (resourceId, method, api, path) {
-  // TODO: Create params const
+async function createMethodIntegration (resourceId, method, api, path) {
+  const params = {
+    httpMethod: method,
+    resourceId,
+    restApiId: api.id,
+    integrationHttpMethod: method,
+    type: 'HTTP_PROXY',
+    uri: 'http://hamsterELB-1102130463.us-east-1.elb.amazonaws.com',
+  };
 
-  return new Promise((resolve, reject) => {
-    // TODO: Put the integration and return the resourceId argument
-  })
+  await apiG.putIntegration(params).promise();
+  return resourceId;
 }
