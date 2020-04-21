@@ -2,10 +2,10 @@
 const AWS = require('aws-sdk')
 const helpers = require('./helpers')
 
-AWS.config.update({ region: '/* TODO: Add your region */' })
+AWS.config.update({ region: 'us-east-1' });
 
 // Declare local variables
-// TODO: Declare dynamoDB DocumentClient object
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 helpers.getHamsterData()
 .then(data => populateTable('hamsters', data))
@@ -14,9 +14,20 @@ helpers.getHamsterData()
 .then(data => console.log(data))
 
 function populateTable (tableName, data) {
-  // TODO: Create params const object
+  const params = {
+    RequestItems: {
+      [tableName]: data.map(item => ({
+        PutRequest: {
+          Item: item,
+        },
+      }))
+    },
+  };
 
   return new Promise((resolve, reject) => {
-    // TODO: Call batch write function
-  })
+      docClient.batchWrite(params, (err, data) => {
+        if (err) { reject(err); }
+        else { resolve(data); }
+      });
+  });
 }
