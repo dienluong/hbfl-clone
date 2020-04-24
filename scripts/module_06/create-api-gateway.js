@@ -59,6 +59,12 @@ async function createResourceMethod (resourceId, method, api, path) {
     restApiId: api.id,
   };
 
+  if (path) {
+    params.requestParameters = {
+      [`method.request.path.${path}`]: true,
+    };
+  }
+
   await apiG.putMethod(params).promise();
   return resourceId;
 }
@@ -73,6 +79,12 @@ async function createMethodIntegration (resourceId, method, api, path) {
     uri: 'http://hamsterELB-1102130463.us-east-1.elb.amazonaws.com',
   };
 
+  if (path) {
+    params.uri += `/{${path}}`;
+    params.requestParameters = {
+      [`integration.request.path.${path}`]: `method.request.path.${path}`,
+    }
+  }
   await apiG.putIntegration(params).promise();
   return resourceId;
 }
