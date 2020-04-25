@@ -61,6 +61,7 @@ function zipLambdaFile () {
   })
 
   return new Promise((resolve, reject) => {
+    // once the stream is completed, return the (zipped) content
     writableStreamBuffer.on('finish', () => {
       resolve(writableStreamBuffer.getContents())
     })
@@ -68,7 +69,9 @@ function zipLambdaFile () {
     archive.on('warning', err => reject(err))
     archive.on('error', err => reject(err))
 
+    // the zipped code is piped to the writable stream
     archive.pipe(writableStreamBuffer)
+    // send the lambda-kinesis-consumer/index.js code to the archiver
     archive.append(fs.createReadStream(path.join(__dirname, 'lambda-kinesis-consumer', 'index.js')), { name: 'index.js' })
     archive.finalize()
   })
